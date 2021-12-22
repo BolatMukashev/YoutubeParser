@@ -4,8 +4,7 @@ from youtube_parser import YoutubeVideo
 
 
 if __name__ == '__main__':
-    video = YoutubeVideo('https://youtu.be/3n96sGInvig')
-    video.download_video()
+    video = YoutubeVideo('https://youtu.be/Nv-R4e7uBRQ')
     parts_for_cuts = [
         {'start': '00:17:03.8', 'end': '00:17:43.6', 'x_offset': 0, 'vertical': True}
     ]
