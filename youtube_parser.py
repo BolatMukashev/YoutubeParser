@@ -1,7 +1,6 @@
-import sys
 import os
 from pytube import YouTube
-# from pytube.cli import on_progress
+from pytube.cli import on_progress
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 
@@ -14,13 +13,13 @@ class YoutubeVideo(object):
 
     def __init__(self, url):
         self.url = url
-        self.PATH_TO_ORIGINAL_VIDEO = r'C:\Users\user\Desktop\картинки для сайта\youtube_video'
-        self.PATH_TO_CROPPED_VIDEOS = r'C:\Users\user\Desktop\картинки для сайта\youtube_video\clips'
-        self.PATH_TO_FINAL_VIDEO = r'C:\Users\user\Desktop\картинки для сайта\youtube_video\final'
+        self.PATH_TO_ORIGINAL_VIDEO = os.path.join(os.getcwd(), 'video')
+        self.PATH_TO_CROPPED_VIDEOS = os.path.join(self.PATH_TO_ORIGINAL_VIDEO, 'clips')
+        self.PATH_TO_FINAL_VIDEO = os.path.join(self.PATH_TO_ORIGINAL_VIDEO, 'final')
         self.video_name = self.download_video()
 
     def download_video(self):
-        yt = YouTube(self.url, on_progress_callback=self._progress_function)
+        yt = YouTube(self.url, on_progress_callback=on_progress)
         yt_video = yt.streams.filter(progressive=True, file_extension='mp4').get_highest_resolution()
         title = yt_video.title
         yt_video.download(self.PATH_TO_ORIGINAL_VIDEO)
@@ -99,16 +98,6 @@ class YoutubeVideo(object):
             pass
         finally:
             final_clip.close()
-
-    @staticmethod
-    def _progress_function(chunk, file_handle, bytes_remaining):
-        global file_size
-        current = ((file_size - bytes_remaining) / file_size)
-        percent = '{0:.1f}'.format(current * 100)
-        progress = int(50 * current)
-        status = '█' * progress + '-' * (50 - progress)
-        sys.stdout.write(' ↳ |{bar}| {percent}%\r'.format(bar=status, percent=percent))
-        sys.stdout.flush()
 
     def clear(self):
         file_name = 'Thumbs.db'
