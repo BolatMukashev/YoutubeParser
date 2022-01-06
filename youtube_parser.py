@@ -1,7 +1,10 @@
 import os
+import random
+import string
 from pytube import YouTube
 from pytube.cli import on_progress
 from moviepy.editor import VideoFileClip, concatenate_videoclips
+from typing import List
 
 
 class YoutubeVideo(object):
@@ -11,12 +14,13 @@ class YoutubeVideo(object):
     9:16 = 405 на 720
     """
 
-    def __init__(self, url):
+    def __init__(self, url, name=None):
         self.url = url
-        self.PATH_TO_ORIGINAL_VIDEO = os.path.join(os.getcwd(), 'video')
+        self.PATH_TO_ORIGINAL_VIDEO = os.path.join(os.getcwd(), 'videos')
         self.PATH_TO_CROPPED_VIDEOS = os.path.join(self.PATH_TO_ORIGINAL_VIDEO, 'clips')
         self.PATH_TO_FINAL_VIDEO = os.path.join(self.PATH_TO_ORIGINAL_VIDEO, 'final')
-        self.video_name = self.download_video()
+        self.video_name = name or self.download_video()
+        self.output_name = self._get_name_with_random_prefix(self.video_name)
 
     def download_video(self):
         yt = YouTube(self.url, on_progress_callback=on_progress)
@@ -25,11 +29,10 @@ class YoutubeVideo(object):
         yt_video.download(self.PATH_TO_ORIGINAL_VIDEO)
         return title.replace(':', '')
 
-    def cut_do_vertical_and_save(self, output_name, times: list):
+    def cut_do_vertical_and_save(self, times: List[dict]):
         """
         Обрезать видео, сделать вертикальным и сохранить
         fps default = 24
-        :param output_name: название клипа при сохранении
         :param times: лист с таймингами (от, до, смещение оси x относительно центра кадра, делать вертикальным)
         Пример: ('00:18:26.0', '00:20:24.0', -200, 1)
         :return:
@@ -42,7 +45,7 @@ class YoutubeVideo(object):
                 video_width, video_height = clip.size
                 clip = clip.crop(x1=(video_width - 405 + time['x_offset']) / 2, width=405)
             clips.append(clip)
-        path_to_save = os.path.join(self.PATH_TO_CROPPED_VIDEOS, f'{output_name}.mp4')
+        path_to_save = os.path.join(self.PATH_TO_CROPPED_VIDEOS, f'{self.output_name}.mp4')
         new_clip = concatenate_videoclips(clips)
         new_clip = new_clip.resize(height=1920)                    # сохранить кусочки и горизонт?
         try:
@@ -79,9 +82,10 @@ class YoutubeVideo(object):
         clip = VideoFileClip(path_to_video)
         return clip
 
-    def concatenate_clips_and_save(self, output_name, ending):
+    def concatenate_clips_and_save(self):
         self.clear()
         clips = []
+        ending: str = random.choice(['lady', 'tyan'])
         li = os.listdir(self.PATH_TO_CROPPED_VIDEOS)
         for clip_name in li:
             clip = self.get_clip(clip_name, self.PATH_TO_CROPPED_VIDEOS)
@@ -91,7 +95,7 @@ class YoutubeVideo(object):
         clips.append(ending_video)
 
         final_clip = concatenate_videoclips(clips)
-        path_to_save = os.path.join(self.PATH_TO_FINAL_VIDEO, f'{output_name}.mp4')
+        path_to_save = os.path.join(self.PATH_TO_FINAL_VIDEO, f'{self.output_name}.mp4')
         try:
             final_clip.write_videofile(path_to_save)
         except OSError:
@@ -107,3 +111,10 @@ class YoutubeVideo(object):
         for el in [path1, path2, path3]:
             if os.path.isfile(el):
                 os.remove(el)
+
+    @staticmethod
+    def _get_name_with_random_prefix(original_name):
+        name = original_name.split()[0]
+        random_prefix = random.choices(string.ascii_letters + string.digits, k=10)
+        random_prefix = ''.join(random_prefix)
+        return name + '_' + random_prefix
