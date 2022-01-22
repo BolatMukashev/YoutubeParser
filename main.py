@@ -4,10 +4,9 @@ from youtube_parser import YoutubeVideo
 
 
 if __name__ == '__main__':
-    video: YoutubeVideo = YoutubeVideo('https://youtu.be/Nv-R4e7uBRQ', 'Как чиновники избавляются от пешеходов')
+    video: YoutubeVideo = YoutubeVideo('https://youtu.be/9wd0Z9jaqPU')
     parts_for_cuts = [
-        {'start': '00:16:47.7', 'end': '00:17:31.2', 'x_offset': 0, 'vertical': True},
-        {'start': '00:17:38.0', 'end': '00:17:44.0', 'x_offset': 0, 'vertical': True},
+        {'start': '00:00:02.0', 'end': '00:00:41.8', 'x_offset': 0, 'vertical': False},
     ]
     # video.cut_do_vertical_and_save(times=parts_for_cuts)
-    video.concatenate_clips_and_save()
+    # video.concatenate_clips_and_save()
